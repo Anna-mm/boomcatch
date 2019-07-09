@@ -49,16 +49,20 @@ function map (prefix, data, referer) {
     data = normalise(data);
 
     Object.keys(data).forEach(function (category) {
-        var mapper;
+		var mapper;
+		let tempPrefix;
 
-        if (category === 'restiming') {
-            mapper = mapRestimingMetrics;
+		if (category === 'restiming') {
+			mapper = mapRestimingMetrics;
+			tempPrefix = prefix + category;
         } else {
-            mapper = mapMetrics;
+			mapper = mapMetrics;
+			const url = data[category] ? (cleanResource(data[category].url, 'pageUrl', referer) + '.') : '';
+			tempPrefix = prefix + category + '.' + url;
         }
 
         if (data[category]) {
-            result += mapper(prefix + category + '.', data[category], referer);
+            result += mapper(tempPrefix, data[category], referer);
         }
     });
 
@@ -72,12 +76,23 @@ function mapRestimingMetrics (prefix, data, referer) {
         }
 
         return mapMetrics([
-            prefix + base36Encode(referer),
-            index,
+            prefix,
+            // index,
             resource.type,
-            base36Encode(resource.name)
+            cleanResource(resource.name, resource.type, referer)
         ].join('.') + '.', resource);
     }).join('');
+}
+
+function cleanResource(name, type, referer) {
+	if (type === 'xmlhttprequest') {
+		return name.replace(referer, '/').replace(/\?.*/, '');
+	} else if(type === 'pageUrl') {
+		return name.replace(referer, '').replace('#/', '').replace(/\?.*/, '');
+	} else {
+		return name.replace(/.*\//, '');
+	}
+
 }
 
 function base36Encode (string) {

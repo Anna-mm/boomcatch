@@ -60,7 +60,7 @@ function normaliseRtData (data) {
                 lastbyte: timeToLastByte,
                 load: timeToLoad
             },
-            url: data.r
+            url: data.u
         };
     }
 }
